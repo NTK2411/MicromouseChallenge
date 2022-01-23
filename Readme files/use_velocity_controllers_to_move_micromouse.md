@@ -1,3 +1,12 @@
+# Example 3: Use Velocity Controller to move Micromouse
+
+**Goal**: Control each micromouse wheel separately by publishing on each topic.
+
+## Code
+
+`velocity_controller.py`
+
+```python
 #!/usr/bin/env python3
 import rospy
 from std_msgs.msg import Float64
@@ -23,3 +32,15 @@ if __name__ == '__main__':
         servo_cmd(servo_val, flag)
     except rospy.ROSInterruptException:
         pass
+
+```
+
+<center><a href="velocity_controller.py" download><button>Download</button></a></center>
+
+<br/>
+
+> **Note 1**: Load the yaml file `velocity_controller.yaml` in config directory first.
+
+> **Note 2**: Use ROS_CONTROL Package provided by ROS. Just read the file and `micromouse_bot.gazebo` and uncomment the plugin and use `velocity_controller.py` for further references.
+
+---

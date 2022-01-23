@@ -49,7 +49,7 @@ def clbk_laser(msg):
 def change_state(state):
     global state_, state_dict_
     if state is not state_:
-        print 'Wall follower - [%s] - %s' % (state, state_dict_[state])
+        print ('Wall follower - [%s] - %s' % (state, state_dict_[state]))
         state_ = state
 
 def take_action():

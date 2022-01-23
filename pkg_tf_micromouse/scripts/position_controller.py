@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # license removed for brevity
 import rospy
 from std_msgs.msg import Float64
