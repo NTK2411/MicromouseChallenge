@@ -30,6 +30,10 @@ an algorithm to make an array like this:
 # walls[2][2] += 1
 # walls[2][1] += 100
 
+import queue
+from genpy import DeserializationError
+
+
 def make_wall(wall_array, cell1, cell2):
     ''' 
     -left wall 1
@@ -82,7 +86,7 @@ def make_wall(wall_array, cell1, cell2):
 # print(walls)
 # print()
 
-def mod_flood_fill(maze, walls, start_row, start_col):
+def mod_flood_fill(maze, walls, destination_array_maze_pos):
     '''
     mod_flood_fill function
     '''
@@ -91,13 +95,20 @@ def mod_flood_fill(maze, walls, start_row, start_col):
     visited = [[0 for i in range(size)] for j in range(size)]
     
     value = 0
-    maze[start_row][start_col] = value
-    visited[start_row][start_col] = True
-    # maze[start_row+1][start_col] = value
-    # visited[start_row+1][start_col] = True
-    
-    queue = [(start_row, start_col,value)]
-    # queue.append((start_row+1, start_col,value))
+    queue = []
+    for pos in destination_array_maze_pos:
+        x = pos[0]
+        y = pos[1]
+        # if visited[x][y] == 0:
+        #     value += 1
+        #     visited = flood_fill(maze, walls, visited, x, y, value)
+        maze[x][y] = value
+        visited[x][y] = True
+        # maze[x+1][y] = value
+        # visited[x+1][y] = True
+        
+        queue.append((x, y,value))
+        # queue.append((x+1, y,value))
     while len(queue) > 0:
         row, col, value = queue.pop(0)
         value += 1
@@ -105,7 +116,7 @@ def mod_flood_fill(maze, walls, start_row, start_col):
         #up case
         i = row - 1
         j = col
-        if 0 <= i < size and 0 <= j < size and ((walls[i][j]//10)%10) != 1 and not visited[i][j]:
+        if 0 <= i < size and 0 <= j < size and ((walls[row][col]//1000)) != 1 and ((walls[i][j]//10)%10) != 1 and not visited[i][j]:
             if visited[i][j] == False:
                 maze[i][j] = value
                 visited[i][j] = True
@@ -114,7 +125,7 @@ def mod_flood_fill(maze, walls, start_row, start_col):
         i = row + 1
         j = col
         
-        if 0 <= i < size and 0 <= j < size and ((walls[i][j]//1000)) != 1 and not visited[i][j]:
+        if 0 <= i < size and 0 <= j < size and ((walls[row][col]//10)%10) != 1 and ((walls[i][j]//1000)) != 1 and not visited[i][j]:
             if visited[i][j] == False:
                 maze[i][j] = value
                 visited[i][j] = True
@@ -123,7 +134,7 @@ def mod_flood_fill(maze, walls, start_row, start_col):
         #left case
         j = col - 1 
         i = row
-        if 0 <= i < size and 0 <= j < size and ((walls[i][j]//100)%10) != 1 and not visited[i][j]:
+        if 0 <= i < size and 0 <= j < size and ((walls[row][col]//1)%10) != 1 and ((walls[i][j]//100)%10) != 1 and not visited[i][j]:
             if visited[i][j] == False:
                 maze[i][j] = value
                 visited[i][j] = True
@@ -131,7 +142,7 @@ def mod_flood_fill(maze, walls, start_row, start_col):
         #right case
         j = col + 1 
         i = row
-        if 0 <= i < size and 0 <= j < size and ((walls[i][j]//1)%10) != 1 and not visited[i][j]:
+        if 0 <= i < size and 0 <= j < size and ((walls[row][col]//100)%10) != 1 and ((walls[i][j]//1)%10) != 1 and not visited[i][j]:
             if visited[i][j] == False:
                 maze[i][j] = value
                 visited[i][j] = True
@@ -139,3 +150,13 @@ def mod_flood_fill(maze, walls, start_row, start_col):
     return maze
     
 # print(mod_flood_fill(maze, walls, 3, 2))
+if __name__ == '__main__':
+    import numpy as np
+    maze = [[-1 for i in range(16)] for j in range(16)]
+    walls = [[0 for i in range(16)] for j in range(16)]
+    for i in range(1,14):
+        walls[0][i] = 1010
+    print(np.array(walls))
+    destination = [[8,8],[8,7],[7,8],[7,7]]
+    temp = np.array(mod_flood_fill(maze, walls, destination))
+    print(temp)

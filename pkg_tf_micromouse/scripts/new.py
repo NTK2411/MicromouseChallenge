@@ -32,7 +32,7 @@ desired_position_.y = 1.23#rospy.get_param(0)
 desired_position_.z = 0
 # parameters
 yaw_precision_ = math.pi / 90 # +/- 2 degree allowed
-dist_precision_ = 0.03
+dist_precision_ = 0.02
 # mapping
 maze_size = 16
 maze =  [[-1 for i in range(maze_size)] for j in range(maze_size)]
@@ -62,6 +62,7 @@ def clbk_odom(msg):
 
 # Printed Lasers
 def clbk_laser(msg):
+    global region_front, region_fright, region_fleft, region_right, region_left
     regions = {
         'right':  min(min(msg.ranges[0:90]), 10),
         'fright': min(min(msg.ranges[72:143]), 10),
@@ -83,18 +84,81 @@ def find_orientation():
     '''
     down (-pi/4, pi/4)
     '''
+    '''
+        3 Up (+ y axis)
+        2 Down
+        0 Right(+ x axis)
+        1 Left
+    '''
     global yaw_
     yaw = yaw_
     if -math.pi/4 <= yaw <= math.pi/4:
-        return 1#'down'
+        return 2#'down'
     elif math.pi/4 <= yaw <= 3*math.pi/4:
-        return 2#'right'
+        return 0#'right'
     elif -3*math.pi/4 <= yaw <= -math.pi/4:
-        return 3#'left'
+        return 1#'left'
     elif -2*math.pi <= yaw <= -3*math.pi/4 or 3*math.pi/4 <= yaw <= 2*math.pi:
-        return 0#'up'
+        return 3#'up'
 # Printed phi
+def update_wall_mapping(x,y):
+    global walls, yaw_, region_left, region_fleft, region_front,region_fright, region_right
+    mouse_orn = find_orientation()
+    '''
+        3 Up (+ y axis)
+        2 Down
+        0 Right(+ x axis)
+        1 Left
 
+        w/ reference to +y axis
+        -left wall 1
+        -down wall 10
+        -right wall 100
+        -up wall 1000
+    '''
+    wallf = 0
+    walll = 0
+    wallr = 0
+    state_description = ''
+    if region_front < 0.11:
+        state_description += ' F'
+        if mouse_orn == 0:
+            wallf += 1000
+        if mouse_orn == 1:
+            wallf += 10
+        if mouse_orn == 2:
+            wallf += 100
+        if mouse_orn == 3:
+            wallf += 1
+    if region_right < 0.11:
+        state_description += ' R'
+        if mouse_orn == 0:
+            wallr += 100
+        if mouse_orn == 1:
+            wallr += 1
+        if mouse_orn == 2:
+            wallr += 10
+        if mouse_orn == 3:
+            wallr += 1000
+    if region_left < 0.11:
+        state_description += ' L'
+        if mouse_orn == 0:
+            walll += 1
+        if mouse_orn == 1:
+            walll += 100
+        if mouse_orn == 2:
+            walll += 1000
+        if mouse_orn == 3:
+            walll += 10
+    if wallf != 0:
+        if((walls[x][y]//wallf)%10) != 1:
+                walls[x][y] += wallf
+    if walll != 0:
+        if((walls[x][y]//walll)%10) != 1:
+                walls[x][y] += walll
+    if wallr != 0:
+        if((walls[x][y]//wallr)%10) != 1:
+                walls[x][y] += wallr
 #function to convert global coordinates to maze coordinates
 def convert_to_maze_coordinates(x,y):
     maze_box_size = 0.18
@@ -116,7 +180,7 @@ def convert_to_global_coordinates(x,y):
 def change_state(state):
     global state_
     state_ = state
-    print ('State changed to [%s]' % state_)
+    # print ('State changed to [%s]' % state_)
 
 
 def normalize_angle(angle):
@@ -135,13 +199,13 @@ def fix_yaw(des_pos):
     twist_msg = Twist()
     if math.fabs(err_yaw) > yaw_precision_:
         # twist_msg.angular.z = 0
-        twist_msg.angular.z = 0.7 if err_yaw > 0 else -0.7
+        twist_msg.angular.z = 0.3 if err_yaw > 0 else -0.3
     
     pub.publish(twist_msg)
     # print('Walla Walla')
     # state change conditions
     if math.fabs(err_yaw) <= yaw_precision_:
-        print('Yaw error: [%s]' % err_yaw)
+        # print('Yaw error: [%s]' % err_yaw)
         change_state(1)
 
 def go_straight_ahead(des_pos):
@@ -163,8 +227,9 @@ def go_straight_ahead(des_pos):
     
     # state change conditions
     if math.fabs(err_yaw) > yaw_precision_:
-        print('Yaw error: [%s]' % err_yaw)
-        change_state(0)
+        # print('Yaw error: [%s]' % err_yaw)
+        if state_ != 2:
+            change_state(0)
 # Printed Soup Song
 def done():
     print('Soup Song')
@@ -195,24 +260,51 @@ def move_to_maze_position(x,y):
     state_ = 0
     moveLikeJagger(desired_position_)
 
+###REMOVE THIS LATER ON###
+import numpy as np
+###REMOVE THIS LATER ON###
+
 #explores the maze
 def explore():
     global maze, walls, pos_maze_x, pos_maze_y, state_, desired_position_, maze_size
-    #spawn
-    pos_maze_x, pos_maze_y = convert_to_maze_coordinates(position_.x, position_.y)
-    move_to_maze_position(0,0)
-    print("next")
-    move_to_maze_position(6,0)
     
-    #spawn
+    destination_array_maze_coordinates = [[8,8],[8,7],[7,8],[7,7]]
+    
+    #spawn take spawn position and convert to maze coordinates
+    pos_maze_x, pos_maze_y = convert_to_maze_coordinates(position_.x, position_.y)
+    # move_to_maze_position(0,0)
+    # print("next")
+    # move_to_maze_position(6,0)
+    
+    #spawn done above
     #wall updatw
+    update_wall_mapping(pos_maze_x, pos_maze_y)
     #flood fill maze
+    algo.mod_flood_fill(maze, walls, destination_array_maze_coordinates)
+    print(np.array(maze))
     #for loop
+    pos_maze_x, pos_maze_y = convert_to_maze_coordinates(position_.x, position_.y)
+    
+    x = 0
+    y = 15
+    while(1):
         #decision from flood fill maze
         #move to decision position
+        
+        #pseduo decision
+        y = y - 1
+        print(x,y)
+        move_to_maze_position(x,y)
         #update walls
+        pos_maze_x, pos_maze_y = convert_to_maze_coordinates(position_.x, position_.y)
+        update_wall_mapping(pos_maze_x, pos_maze_y)
         #update flood fill maze
-    
+        algo.mod_flood_fill(maze, walls, destination_array_maze_coordinates)
+        #delete later one / debug print
+        print(np.array(walls))
+        print(np.array(maze))
+        
+        pass
     pass
 
 
@@ -228,9 +320,13 @@ def main():
     # srv = rospy.Service('go_to_point_switch', SetBool, go_to_point_switch)
     
     rate = rospy.Rate(20)
-    
+    #function acting as dummy
+    done()
     while not rospy.is_shutdown():
-        explore()        
+        #function as dummy
+        done()
+        #function exploring maze
+        explore()    
         print("uwu")
         
         
