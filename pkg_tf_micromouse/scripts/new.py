@@ -100,6 +100,45 @@ def find_orientation():
         return 1#'left'
     elif -2*math.pi <= yaw <= -3*math.pi/4 or 3*math.pi/4 <= yaw <= 2*math.pi:
         return 3#'up'
+
+# set yaw to particular angle 
+def set_yaw(desired_yaw):
+    global yaw_
+    err_yaw = normalize_angle(desired_yaw - (yaw_ - math.pi/2))
+    twist_msg = Twist()
+    if math.fabs(err_yaw) > yaw_precision_:
+        twist_msg.angular.z = 0.3 if err_yaw > 0 else -0.3
+    
+    pub.publish(twist_msg)
+    if math.fabs(err_yaw) <= yaw_precision_:
+        change_state(2)
+    pass
+
+    
+# set orientation of the robot to down(0), right(pi), left(-pi), down(2*pi)
+def set_orientation(orientation):
+    global state_
+    '''
+        3 Up (+ y axis)
+        2 Down
+        0 Right(+ x axis)
+        1 Left
+    '''
+    if orientation == 0:
+        desired_yaw = 0
+    elif orientation == 1:
+        desired_yaw = math.pi
+    elif orientation == 2:
+        desired_yaw = -math.pi
+    elif orientation == 3:
+        desired_yaw = 2*math.pi
+    change_state(0)
+    while(state_ != 2):
+        set_yaw(desired_yaw)
+    else:
+        done()
+
+
 # Printed phi
 def update_wall_mapping(x,y):
     global walls, yaw_, region_left, region_fleft, region_front,region_fright, region_right
@@ -289,12 +328,24 @@ def explore():
     y = 15
     while(1):
         #decision from flood fill maze
-        #move to decision position
         
-        #pseduo decision
+        #move to decision position
+        ####                                     ///uncomment later on
+        #next_pos_x, next_pos_y = algo.get_next_pos(maze, pos_maze_x, pos_maze_y)
+        #move_to_maze_position(next_pos_x, next_pos_y)
+        ####                                     ///uncomment later on
+        
+        #pseduo decision ///delete this later on
+        #########                           ///from here to
         y = y - 1
         print(x,y)
         move_to_maze_position(x,y)
+        #########                           ///upt0 here
+        
+        ###correct the orientation before updating walls
+        
+        
+        
         #update walls
         pos_maze_x, pos_maze_y = convert_to_maze_coordinates(position_.x, position_.y)
         update_wall_mapping(pos_maze_x, pos_maze_y)
@@ -325,8 +376,13 @@ def main():
     while not rospy.is_shutdown():
         #function as dummy
         done()
+        print("Lets go")
         #function exploring maze
-        explore()    
+        # explore()   
+        for i in range(100):
+            print(i,i%4)
+            set_orientation(i%4)
+            input("Press Enter to continue...")
         print("uwu")
         
         

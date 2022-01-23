@@ -149,6 +149,15 @@ def mod_flood_fill(maze, walls, destination_array_maze_pos):
                 queue.append((i, j, value))
     return maze
     
+#take in maze, current pos and determine next pos based of flood fill algorithm
+def determine_next_maze_pos(maze, current_maze_pos):
+    x = current_maze_pos[0]
+    y = current_maze_pos[1]
+    next_maze_pos_x = x
+    next_maze_pos_y = y
+    print(maze[x][y])
+    return x,y
+    
 # print(mod_flood_fill(maze, walls, 3, 2))
 if __name__ == '__main__':
     import numpy as np
