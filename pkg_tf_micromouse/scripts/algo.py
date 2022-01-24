@@ -165,7 +165,7 @@ def determine_next_maze_pos(maze, current_maze_pos):
     if y-1>-1 and y-1<16:
         np.append(narray,[maze[x][y-1], x, y-1], axis=0)
     
-    sorted_array = narray[numpy.argsort(narray[:, 0])]
+    sorted_array = narray[np.argsort(narray[:, 0])]
     next_maze_pos_x = sorted_array[0][1]
     next_maze_pos_y = sorted_array[0][2]
     print(maze[x][y])
