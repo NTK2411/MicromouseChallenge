@@ -103,21 +103,23 @@ def find_orientation():
 
 # set yaw to particular angle 
 def set_yaw(desired_yaw):
-    global yaw_
-    err_yaw = normalize_angle(desired_yaw - (yaw_ - math.pi/2))
+    global yaw_, yaw_precision_, pub
+    err_yaw = normalize_angle(desired_yaw - (yaw_))
     twist_msg = Twist()
-    if math.fabs(err_yaw) > yaw_precision_:
+    #error of +/- 1 degrees
+    if math.fabs(err_yaw) > yaw_precision_/2:
         twist_msg.angular.z = 0.3 if err_yaw > 0 else -0.3
     
-    pub.publish(twist_msg)
-    if math.fabs(err_yaw) <= yaw_precision_:
+    if math.fabs(err_yaw) <= yaw_precision_/2:
+        twist_msg.angular.z = 0
         change_state(2)
+    pub.publish(twist_msg)
     pass
 
     
 # set orientation of the robot to down(0), right(pi), left(-pi), down(2*pi)
 def set_orientation(orientation):
-    global state_
+    global state_, yaw_
     '''
         3 Up (+ y axis)
         2 Down
@@ -127,15 +129,17 @@ def set_orientation(orientation):
     if orientation == 0:
         desired_yaw = 0
     elif orientation == 1:
-        desired_yaw = math.pi
-    elif orientation == 2:
         desired_yaw = -math.pi
+    elif orientation == 2:
+        desired_yaw = math.pi/2
     elif orientation == 3:
-        desired_yaw = 2*math.pi
+        desired_yaw = -math.pi/2
+    print(desired_yaw)
     change_state(0)
     while(state_ != 2):
         set_yaw(desired_yaw)
     else:
+        print(yaw_)
         done()
 
 
@@ -320,8 +324,11 @@ def explore():
     update_wall_mapping(pos_maze_x, pos_maze_y)
     #flood fill maze
     algo.mod_flood_fill(maze, walls, destination_array_maze_coordinates)
-    print(np.array(maze))
+    # print(np.array(maze))
     #for loop
+    print("current position: ", pos_maze_x, pos_maze_y)
+    print(np.array(walls))
+    print(np.array(maze))
     pos_maze_x, pos_maze_y = convert_to_maze_coordinates(position_.x, position_.y)
     
     x = 0
@@ -337,23 +344,25 @@ def explore():
         
         #pseduo decision ///delete this later on
         #########                           ///from here to
-        y = y - 1
-        print(x,y)
-        move_to_maze_position(x,y)
-        #########                           ///upt0 here
-        
-        ###correct the orientation before updating walls
-        
-        
-        
-        #update walls
-        pos_maze_x, pos_maze_y = convert_to_maze_coordinates(position_.x, position_.y)
-        update_wall_mapping(pos_maze_x, pos_maze_y)
-        #update flood fill maze
-        algo.mod_flood_fill(maze, walls, destination_array_maze_coordinates)
-        #delete later one / debug print
-        print(np.array(walls))
-        print(np.array(maze))
+        if y > 0:
+            y = y - 1
+            print(x,y)
+            move_to_maze_position(x,y)
+            #########                           ///upt0 here
+            
+            ###correct the orientation before updating walls
+            
+            set_orientation(0)
+            
+            #update walls
+            pos_maze_x, pos_maze_y = convert_to_maze_coordinates(position_.x, position_.y)
+            update_wall_mapping(pos_maze_x, pos_maze_y)
+            #update flood fill maze
+            algo.mod_flood_fill(maze, walls, destination_array_maze_coordinates)
+            #delete later one / debug print
+            print("current position: ", pos_maze_x, pos_maze_y)
+            print(np.array(walls))
+            print(np.array(maze))
         
         pass
     pass
@@ -378,11 +387,15 @@ def main():
         done()
         print("Lets go")
         #function exploring maze
-        # explore()   
-        for i in range(100):
-            print(i,i%4)
-            set_orientation(i%4)
-            input("Press Enter to continue...")
+        explore()   
+        
+        ###     ///debugging set_orientation
+        # for i in range(100):
+        #     print(i,i%4)
+        #     set_orientation(i%4)
+        #     input("Press Enter to continue...")
+        ###     ///debugging set_orientation
+        
         print("uwu")
         
         
