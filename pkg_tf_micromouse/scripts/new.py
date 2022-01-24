@@ -308,7 +308,7 @@ import numpy as np
 ###REMOVE THIS LATER ON###
 
 #explores the maze
-def explore():
+def explore(destination_array_maze_coordinates = [[8,8],[8,7],[7,8],[7,7]]):
     global maze, walls, pos_maze_x, pos_maze_y, state_, desired_position_, maze_size
     
     destination_array_maze_coordinates = [[8,8],[8,7],[7,8],[7,7]]
@@ -331,38 +331,45 @@ def explore():
     print(np.array(maze))
     pos_maze_x, pos_maze_y = convert_to_maze_coordinates(position_.x, position_.y)
     
-    x = 0
-    y = 15
+    next_pos_x = 0
+    next_pos_y = 16
+    pos_maze_x, pos_maze_y = 0,15
     while(1):
         #decision from flood fill maze
         
         #move to decision position
         ####                                     ///uncomment later on
-        #next_pos_x, next_pos_y = algo.get_next_pos(maze, pos_maze_x, pos_maze_y)
-        #move_to_maze_position(next_pos_x, next_pos_y)
+        next_pos_x, next_pos_y = algo.determine_next_maze_pos(maze, [pos_maze_x, pos_maze_y])
+        print("current position: ", pos_maze_x, pos_maze_y)
+        print("next position: ", next_pos_x, next_pos_y)
+        move_to_maze_position(next_pos_x, next_pos_y)
+        pos_maze_x, pos_maze_y = next_pos_x, next_pos_y
         ####                                     ///uncomment later on
         
         #pseduo decision ///delete this later on
         #########                           ///from here to
-        if y > 0:
-            y = y - 1
-            print(x,y)
-            move_to_maze_position(x,y)
-            #########                           ///upt0 here
-            
-            ###correct the orientation before updating walls
-            
-            set_orientation(0)
-            
-            #update walls
-            pos_maze_x, pos_maze_y = convert_to_maze_coordinates(position_.x, position_.y)
-            update_wall_mapping(pos_maze_x, pos_maze_y)
-            #update flood fill maze
-            algo.mod_flood_fill(maze, walls, destination_array_maze_coordinates)
-            #delete later one / debug print
-            print("current position: ", pos_maze_x, pos_maze_y)
-            print(np.array(walls))
-            print(np.array(maze))
+        # if next_pos_y > 0:
+        # next_pos_y = next_pos_y - 1
+        # print(next_pos_x,next_pos_y)
+        # move_to_maze_position(next_pos_x,next_pos_y)
+        #########                           ///upt0 here
+        
+        ###correct the orientation before updating walls
+        
+        set_orientation(0)
+        rospy.sleep(1)
+        #update walls
+        pos_maze_x, pos_maze_y = convert_to_maze_coordinates(position_.x, position_.y)
+        update_wall_mapping(pos_maze_x, pos_maze_y)
+        # update_wall_mapping(next_pos_x, next_pos_y)
+        
+        #update flood fill maze
+        algo.mod_flood_fill(maze, walls, destination_array_maze_coordinates)
+        #delete later one / debug print
+        print("current position: ", pos_maze_x, pos_maze_y)
+        print(position_)
+        print(np.array(walls))
+        print(np.array(maze))
         
         pass
     pass

@@ -65,5 +65,6 @@ def convert_to_global_coordinates(x,y):
 
 if __name__ == '__main__':
     # initial_position()
-    print(convert_to_maze_coordinates(-1.374552,1.23))
-    print(convert_to_global_coordinates(0,0))
+    print(convert_to_global_coordinates(0,10))
+    print(convert_to_maze_coordinates(-1.35,0.62868))
+    print(convert_to_global_coordinates(0,11))

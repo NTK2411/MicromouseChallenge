@@ -182,3 +182,7 @@ if __name__ == '__main__':
     destination = [[8,8],[8,7],[7,8],[7,7]]
     temp = np.array(mod_flood_fill(maze, walls, destination))
     print(temp)
+    print(determine_next_maze_pos(maze, [0,7]))
+    print(determine_next_maze_pos(maze, [1,7]))
+    print(determine_next_maze_pos(maze, [5,7]))
+    print(determine_next_maze_pos(maze, [6,7]))
