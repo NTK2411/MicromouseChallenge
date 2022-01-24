@@ -153,10 +153,17 @@ def mod_flood_fill(maze, walls, destination_array_maze_pos):
 def determine_next_maze_pos(maze, current_maze_pos):
     x = current_maze_pos[0]
     y = current_maze_pos[1]
-    next_maze_pos_x = x
-    next_maze_pos_y = y
+   
+    narray = np.array([[maze[x][y-1], x, y-1],
+                      [maze[x+1][y], x+1, y],
+                      [maze[x-1][y], x-1, y],
+                      [maze[x][y+1], x, y+1],)
+    
+    sorted_array = narray[numpy.argsort(narray[:, 0])]
+    next_maze_pos_x = sorted_array[0][1]
+    next_maze_pos_y = sorted_array[0][2]
     print(maze[x][y])
-    return x,y
+    return next_maze_pos_x,next_maze_pos_y
     
 # print(mod_flood_fill(maze, walls, 3, 2))
 if __name__ == '__main__':
