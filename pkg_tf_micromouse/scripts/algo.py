@@ -10,7 +10,7 @@ an algorithm to make an array like this:
 7 6 5 4 3 4 5 6 7
 8 7 6 5 4 5 6 7 8
 '''
-
+import numpy as np
 #array of -1's of size 5x5
 # size = 10
 # maze =  [[-1 for i in range(10)] for j in range(10)]
@@ -154,10 +154,16 @@ def determine_next_maze_pos(maze, current_maze_pos):
     x = current_maze_pos[0]
     y = current_maze_pos[1]
    
-    narray = np.array([[maze[x][y-1], x, y-1],
-                      [maze[x+1][y], x+1, y],
-                      [maze[x-1][y], x-1, y],
-                      [maze[x][y+1], x, y+1],)
+    narray = np.array([[]])
+    
+    if x+1>-1 and x+1<16:
+        np.append(narray,[maze[x+1][y], x+1, y], axis=0)
+    if x-1>-1 and x-1<16:
+        np.append(narray,[maze[x-1][y], x-1, y], axis=0)
+    if y+1>-1 and y+1<16:
+        np.append(narray,[maze[x][y+1], x, y+1], axis=0)
+    if y-1>-1 and y-1<16:
+        np.append(narray,[maze[x][y-1], x, y-1], axis=0)
     
     sorted_array = narray[numpy.argsort(narray[:, 0])]
     next_maze_pos_x = sorted_array[0][1]
