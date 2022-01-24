@@ -154,23 +154,23 @@ def determine_next_maze_pos(maze, current_maze_pos):
     x = current_maze_pos[0]
     y = current_maze_pos[1]
    
-    narray = np.array([[]])
+    narray = []
     
     if x+1>-1 and x+1<16:
-        np.append(narray,[maze[x+1][y], x+1, y], axis=0)
+        narray.append([maze[x+1][y], x+1, y])
     if x-1>-1 and x-1<16:
-        np.append(narray,[maze[x-1][y], x-1, y], axis=0)
+        narray.append([maze[x-1][y], x-1, y])
     if y+1>-1 and y+1<16:
-        np.append(narray,[maze[x][y+1], x, y+1], axis=0)
+        narray.append([maze[x][y+1], x, y+1])
     if y-1>-1 and y-1<16:
-        np.append(narray,[maze[x][y-1], x, y-1], axis=0)
+        narray.append([maze[x][y-1], x, y-1])
     
-    sorted_array = narray[np.argsort(narray[:, 0])]
-    next_maze_pos_x = sorted_array[0][1]
-    next_maze_pos_y = sorted_array[0][2]
-    print(maze[x][y])
-    return next_maze_pos_x,next_maze_pos_y
+    next_maze_pos=narray[0]
+    for x in narray:
+        if x[0]<next_maze_pos[0]:
+            next_maze_pos = x
     
+    return next_maze_pos[1],next_maze_pos[2]
 # print(mod_flood_fill(maze, walls, 3, 2))
 if __name__ == '__main__':
     import numpy as np
