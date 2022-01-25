@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 
 # import ros stuff
+from matplotlib.pyplot import flag
 import rospy
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist, Point
@@ -339,7 +340,7 @@ def explore(destination_array_maze_coordinates = [[8,8],[8,7],[7,8],[7,7]]):
         
         #move to decision position
         ####                                     ///uncomment later on
-        next_pos_x, next_pos_y = algo.determine_next_maze_pos(maze, [pos_maze_x, pos_maze_y])
+        next_pos_x, next_pos_y = algo.determine_next_maze_pos(maze, walls, [pos_maze_x, pos_maze_y])
         print("current position: ", pos_maze_x, pos_maze_y)
         print("next position: ", next_pos_x, next_pos_y)
         move_to_maze_position(next_pos_x, next_pos_y)
@@ -374,6 +375,21 @@ def explore(destination_array_maze_coordinates = [[8,8],[8,7],[7,8],[7,7]]):
         pass
     pass
 
+#function to run until odom doesn't return 0
+def initialize():
+    global position_, region_left, region_fleft, region_front,region_fright, region_right
+    flag_position, flag_laser = 0, 0
+    print("initializing",end='')
+    while(1):
+        print(".", end='')
+        if flag_position == 0:
+            if position_.x != 0 and position_.y != 0:
+                flag_position = 1
+        if flag_laser == 0:
+            if (region_right + region_left + region_front) != 0:
+                flag_laser = 1
+        if flag_position == 1 and flag_laser == 1:
+            break
 
 def main():
     global pub, desired_position_, state_, pos_maze_x, pos_maze_y, maze_size
@@ -389,6 +405,7 @@ def main():
     rate = rospy.Rate(20)
     #function acting as dummy
     done()
+    initialize()
     while not rospy.is_shutdown():
         #function as dummy
         done()

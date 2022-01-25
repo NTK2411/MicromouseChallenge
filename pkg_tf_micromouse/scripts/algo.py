@@ -30,8 +30,8 @@ import numpy as np
 # walls[2][2] += 1
 # walls[2][1] += 100
 
-import queue
-from genpy import DeserializationError
+# import queue
+# from genpy import DeserializationError
 
 
 def make_wall(wall_array, cell1, cell2):
@@ -150,7 +150,19 @@ def mod_flood_fill(maze, walls, destination_array_maze_pos):
     return maze
     
 #take in maze, current pos and determine next pos based of flood fill algorithm
-def determine_next_maze_pos(maze, current_maze_pos):
+def determine_next_maze_pos(maze, walls, current_maze_pos):
+    '''
+        3 Up (+ y axis)
+        2 Down
+        0 Right(+ x axis)
+        1 Left
+
+        w/ reference to +y axis
+        -left wall 1
+        -down wall 10
+        -right wall 100
+        -up wall 1000
+    '''
     x = current_maze_pos[0]
     y = current_maze_pos[1]
    
