@@ -34,6 +34,8 @@ desired_position_.z = 0
 # parameters
 yaw_precision_ = math.pi / 90 # +/- 2 degree allowed
 dist_precision_ = 0.02
+wall_distance_senstivity = 0.15
+wall_distance_senstivity_front_additonal = 0.0
 # mapping
 maze_size = 16
 maze =  [[-1 for i in range(maze_size)] for j in range(maze_size)]
@@ -64,12 +66,13 @@ def clbk_odom(msg):
 # Printed Lasers
 def clbk_laser(msg):
     global region_front, region_fright, region_fleft, region_right, region_left
+    # print()
     regions = {
-        'right':  min(min(msg.ranges[0:90]), 10),
+        'right':  sum(msg.ranges[0:30]) / len(msg.ranges[0:30]),#min(min(msg.ranges[0:90]), 10),
         'fright': min(min(msg.ranges[72:143]), 10),
-        'front':  min(min(msg.ranges[144:215]), 10),
+        'front':  sum(msg.ranges[165:195]) / len(msg.ranges[165:195]),#min(min(msg.ranges[144:215]), 10),
         'fleft':  min(min(msg.ranges[216:287]), 10),
-        'left':   min(min(msg.ranges[270:359]), 10),
+        'left':   sum(msg.ranges[330:360]) / len(msg.ranges[330:360])#min(min(msg.ranges[270:359]), 10),
     }
     # print()
     # print("Lasers: ", regions['left'],regions['fleft'],regions['front'],regions['fright'],regions['right'])
@@ -122,18 +125,18 @@ def set_yaw(desired_yaw):
 def set_orientation(orientation):
     global state_, yaw_
     '''
-        3 Up (+ y axis)
-        2 Down
         0 Right(+ x axis)
         1 Left
+        2 Down
+        3 Up (+ y axis)
     '''
-    if orientation == 0:
+    if orientation == 2:
         desired_yaw = 0
-    elif orientation == 1:
-        desired_yaw = -math.pi
-    elif orientation == 2:
-        desired_yaw = math.pi/2
     elif orientation == 3:
+        desired_yaw = -math.pi
+    elif orientation == 0:
+        desired_yaw = math.pi/2
+    elif orientation == 1:
         desired_yaw = -math.pi/2
     print(desired_yaw)
     change_state(0)
@@ -146,7 +149,7 @@ def set_orientation(orientation):
 
 # Printed phi
 def update_wall_mapping(x,y):
-    global walls, yaw_, region_left, region_fleft, region_front,region_fright, region_right
+    global walls, yaw_, region_left, region_fleft, region_front,region_fright, region_right, wall_distance_senstivity
     mouse_orn = find_orientation()
     '''
         0 Right(+ x axis)
@@ -164,8 +167,8 @@ def update_wall_mapping(x,y):
     walll = 0
     wallr = 0
     state_description = ''
-    wall_distance_senstivity = 0.093
-    if region_front < wall_distance_senstivity + 0.025:
+    # wall_distance_senstivity = 0.1
+    if region_front < wall_distance_senstivity + wall_distance_senstivity_front_additonal:
         state_description += ' F'
         if mouse_orn == 0:
             wallf += 100
@@ -316,7 +319,7 @@ import numpy as np
 def explore(destination_array_maze_coordinates = [[8,8],[8,7],[7,8],[7,7]]):
     global maze, walls, pos_maze_x, pos_maze_y, state_, desired_position_, maze_size
     
-    destination_array_maze_coordinates = [[8,8],[8,7],[7,8],[7,7]]
+    # destination_array_maze_coordinates = [[8,8],[8,7],[7,8],[7,7]]
     
     #spawn take spawn position and convert to maze coordinates
     pos_maze_x, pos_maze_y = convert_to_maze_coordinates(position_.x, position_.y)
@@ -327,6 +330,7 @@ def explore(destination_array_maze_coordinates = [[8,8],[8,7],[7,8],[7,7]]):
     #spawn done above
     #wall updatw
     print("Initialized:: region_left: %s, region_front: %s, region_right: %s" % (region_left, region_front, region_right))
+    pos_maze_x, pos_maze_y = 0,15
     update_wall_mapping(pos_maze_x, pos_maze_y)
     #flood fill maze
     algo.mod_flood_fill(maze, walls, destination_array_maze_coordinates)
@@ -340,7 +344,7 @@ def explore(destination_array_maze_coordinates = [[8,8],[8,7],[7,8],[7,7]]):
     next_pos_x = 0
     next_pos_y = 16
     pos_maze_x, pos_maze_y = 0,15
-    while(1):
+    while(maze[pos_maze_x][pos_maze_y] != 0):
         #decision from flood fill maze
         
         #move to decision position
@@ -349,6 +353,8 @@ def explore(destination_array_maze_coordinates = [[8,8],[8,7],[7,8],[7,7]]):
         print("current position: ", pos_maze_x, pos_maze_y)
         print("next position: ", next_pos_x, next_pos_y)
         move_to_maze_position(next_pos_x, next_pos_y)
+        #direction is matrix subtraction nex_pos - pos
+        direction = [next_pos_x - pos_maze_x, next_pos_y - pos_maze_y]
         pos_maze_x, pos_maze_y = next_pos_x, next_pos_y
         ####                                     ///uncomment later on
         
@@ -361,11 +367,21 @@ def explore(destination_array_maze_coordinates = [[8,8],[8,7],[7,8],[7,7]]):
         #########                           ///upt0 here
         
         ###correct the orientation before updating walls
-        
-        # set_orientation(find_orientation())
-        rospy.sleep(1)
+        #convert direction to orientation
+        orn_wall_map = -1
+        if direction[0] == 1:
+            orn_wall_map = 0
+        if direction[0] == -1:
+            orn_wall_map = 1
+        if direction[1] == 1:
+            orn_wall_map = 3
+        if direction[1] == -1:
+            orn_wall_map = 2
+        set_orientation(orn_wall_map)
+        # rospy.sleep(1)
         #update walls
         # pos_maze_x, pos_maze_y = convert_to_maze_coordinates(position_.x, position_.y)
+        
         update_wall_mapping(pos_maze_x, pos_maze_y)
         # update_wall_mapping(next_pos_x, next_pos_y)
         
@@ -378,6 +394,7 @@ def explore(destination_array_maze_coordinates = [[8,8],[8,7],[7,8],[7,7]]):
         print(np.array(maze))
         
         pass
+    return pos_maze_x, pos_maze_y
     pass
 
 #function to run until odom doesn't return 0
@@ -396,6 +413,15 @@ def initialize():
         if flag_position == 1 and flag_laser == 1:
             break
     print("Initialized, region_left: %s, region_front: %s, region_right: %s" % (region_left, region_front, region_right))
+    
+def run(end_pos):
+    global maze, walls
+    algo.mod_flood_fill(maze, walls, [end_pos])
+    path = algo.convert_to_path(maze, walls, end_pos)
+    for pos in path:
+        x = pos[0]
+        y = pos[1]
+        move_to_maze_position(x,y)
 
 def main():
     global pub, desired_position_, state_, pos_maze_x, pos_maze_y, maze_size
@@ -412,23 +438,48 @@ def main():
     #function acting as dummy
     done()
     initialize()
+    start_pos = [0,15]
     while not rospy.is_shutdown():
+        
+        #                                               ///
         #function as dummy
         done()
         print("Lets go")
         #function exploring maze
-        explore()   
+        end_pos = explore()   
+        explore([[0,15]])
+        
+        #run 1
+        print("Going for Run 1")
+        run(end_pos)
+        run(start_pos)
+        print()
+        
+        #run 2
+        print("Going for Run 2")
+        run(end_pos)
+        run(start_pos)
+        print()
+        
+        #run 3
+        print("Going for Run 3")
+        run(end_pos)
+        run(start_pos)
+        
+        print()
+        #                                               ///
         
         ###     ///debugging set_orientation
         # for i in range(100):
-        #     print(i,i%4)
+        #     dir = ["RIGHT", "LEFT", "DOWN", "UP"]
+        #     print(i,dir[i%4])
         #     set_orientation(i%4)
         #     input("Press Enter to continue...")
         ###     ///debugging set_orientation
         
         print("uwu")
         
-        
+        return
         pass
 
 if __name__ == '__main__':

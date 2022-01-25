@@ -91,6 +91,7 @@
       <heading_deg>0</heading_deg>
     </spherical_coordinates>
     <model name='my_maze'>
+      <static>1</static>
       <link name='base'>
         <pose frame=''>0 0 0 0 -0 0</pose>
         <inertial>
