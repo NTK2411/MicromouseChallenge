@@ -169,13 +169,17 @@ def determine_next_maze_pos(maze, walls, current_maze_pos):
     narray = []
     
     if x+1>-1 and x+1<16:
-        narray.append([maze[x+1][y], x+1, y])
+        if ((walls[y][x]//100)%10) != 1 and ((walls[y][x+1]//1)%10) != 1 :
+            narray.append([maze[y][x+1], y, x+1])
     if x-1>-1 and x-1<16:
-        narray.append([maze[x-1][y], x-1, y])
+        if ((walls[y][x]//1)%10) != 1 and ((walls[y][x-1]//100)%10) != 1:
+            narray.append([maze[y][x-1], y, x-1])
     if y+1>-1 and y+1<16:
-        narray.append([maze[x][y+1], x, y+1])
+        if ((walls[y][x]//10)%10) != 1 and ((walls[y+1][x]//1000)) != 1:
+            narray.append([maze[y+1][x], y+1, x])
     if y-1>-1 and y-1<16:
-        narray.append([maze[x][y-1], x, y-1])
+        if ((walls[y][x]//1000)) != 1 and ((walls[x][y-1]//10)%10) != 1:
+            narray.append([maze[y-1][x], y-1, x])
     
     next_maze_pos=narray[0]
     for x in narray:
