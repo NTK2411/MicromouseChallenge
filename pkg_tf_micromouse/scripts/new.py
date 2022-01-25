@@ -322,6 +322,7 @@ def explore(destination_array_maze_coordinates = [[8,8],[8,7],[7,8],[7,7]]):
     
     #spawn done above
     #wall updatw
+    print("Initialized, region_left: %s, region_front: %s, region_right: %s" % (region_left, region_front, region_right))
     update_wall_mapping(pos_maze_x, pos_maze_y)
     #flood fill maze
     algo.mod_flood_fill(maze, walls, destination_array_maze_coordinates)
@@ -357,10 +358,10 @@ def explore(destination_array_maze_coordinates = [[8,8],[8,7],[7,8],[7,7]]):
         
         ###correct the orientation before updating walls
         
-        set_orientation(0)
+        set_orientation(find_orientation())
         rospy.sleep(1)
         #update walls
-        pos_maze_x, pos_maze_y = convert_to_maze_coordinates(position_.x, position_.y)
+        # pos_maze_x, pos_maze_y = convert_to_maze_coordinates(position_.x, position_.y)
         update_wall_mapping(pos_maze_x, pos_maze_y)
         # update_wall_mapping(next_pos_x, next_pos_y)
         
@@ -379,17 +380,18 @@ def explore(destination_array_maze_coordinates = [[8,8],[8,7],[7,8],[7,7]]):
 def initialize():
     global position_, region_left, region_fleft, region_front,region_fright, region_right
     flag_position, flag_laser = 0, 0
-    print("initializing",end='')
+    print("initializing",end=' ')
     while(1):
-        print(".", end='')
+        # print(".", end='')
         if flag_position == 0:
             if position_.x != 0 and position_.y != 0:
                 flag_position = 1
         if flag_laser == 0:
-            if (region_right + region_left + region_front) != 0:
+            if (region_right + region_left + region_front) < 30000:
                 flag_laser = 1
         if flag_position == 1 and flag_laser == 1:
             break
+    print("Initialized, region_left: %s, region_front: %s, region_right: %s" % (region_left, region_front, region_right))
 
 def main():
     global pub, desired_position_, state_, pos_maze_x, pos_maze_y, maze_size
