@@ -163,22 +163,29 @@ def determine_next_maze_pos(maze, walls, current_maze_pos):
         -right wall 100
         -up wall 1000
     '''
-    x = current_maze_pos[0]
-    y = current_maze_pos[1]
+    y = current_maze_pos[0]
+    x = current_maze_pos[1]
    
     narray = []
+    # print(x,y,maze[x][y],walls[x][y])
     
+    # print(y,x,maze[y][x],walls[y][x])
+    # print(walls[y][x],((walls[y][x]//10)%10))
     if x+1>-1 and x+1<16:
-        if ((walls[y][x]//100)%10) != 1 and ((walls[y][x+1]//1)%10) != 1 :
+        if (((walls[y][x]//100)%10) == 1 or ((walls[y][x+1]//1)%10) == 1)!= True:
+            # print("right")
             narray.append([maze[y][x+1], y, x+1])
     if x-1>-1 and x-1<16:
-        if ((walls[y][x]//1)%10) != 1 and ((walls[y][x-1]//100)%10) != 1:
+        if (((walls[y][x]//1)%10) == 1 or ((walls[y][x-1]//100)%10) == 1)!= True:
+            # print("left")
             narray.append([maze[y][x-1], y, x-1])
     if y+1>-1 and y+1<16:
-        if ((walls[y][x]//10)%10) != 1 and ((walls[y+1][x]//1000)) != 1:
+        if (((walls[y][x]//10)%10) == 1 or ((walls[y+1][x]//1000)) == 1)!= True:
+            # print("down")
             narray.append([maze[y+1][x], y+1, x])
     if y-1>-1 and y-1<16:
-        if ((walls[y][x]//1000)) != 1 and ((walls[x][y-1]//10)%10) != 1:
+        if (((walls[y][x]//1000)) == 1 or ((walls[x][y-1]//10)%10) == 1)!= True:
+            # print("up")
             narray.append([maze[y-1][x], y-1, x])
     
     next_maze_pos=narray[0]
@@ -187,18 +194,35 @@ def determine_next_maze_pos(maze, walls, current_maze_pos):
             next_maze_pos = x
     
     return next_maze_pos[1],next_maze_pos[2]
+
 # print(mod_flood_fill(maze, walls, 3, 2))
+
+def convert_to_path(maze, walls, current_maze_pos):
+    path = []
+    x = current_maze_pos[0]
+    y = current_maze_pos[1]
+    while(maze[x][y] != 0):
+        path.append([x,y])
+        next_maze_pos = determine_next_maze_pos(maze, walls, [x,y])
+        x = next_maze_pos[0]
+        y = next_maze_pos[1]
+    path.append([x,y])
+    return path
+
 if __name__ == '__main__':
     import numpy as np
     maze = [[-1 for i in range(16)] for j in range(16)]
     walls = [[0 for i in range(16)] for j in range(16)]
-    for i in range(1,14):
+    for i in range(1,16):
+        # print(i)
         walls[0][i] = 1010
     print(np.array(walls))
     destination = [[8,8],[8,7],[7,8],[7,7]]
     temp = np.array(mod_flood_fill(maze, walls, destination))
     print(temp)
-    print(determine_next_maze_pos(maze, [0,7]))
-    print(determine_next_maze_pos(maze, [1,7]))
-    print(determine_next_maze_pos(maze, [5,7]))
-    print(determine_next_maze_pos(maze, [6,7]))
+    # print(determine_next_maze_pos(maze, walls, [0,7]))
+    # print(determine_next_maze_pos(maze, walls, [1,7]))
+    # print(determine_next_maze_pos(maze, walls, [5,7]))
+    # print(determine_next_maze_pos(maze, walls, [6,7]))
+    print(convert_to_path(temp, walls, [0,15]))
+    

@@ -63,8 +63,42 @@ def convert_to_global_coordinates(x,y):
     
     return global_x, global_y
 
+import algo
+
+#take flood fill algorithm and convert to a path
+def convert_to_path(maze, walls, current_maze_pos):
+    path = []
+    x = current_maze_pos[0]
+    y = current_maze_pos[1]
+    while(maze[x][y] != 0):
+        path.append([x,y])
+        next_maze_pos = algo.determine_next_maze_pos(maze, walls, [x,y])
+        x = next_maze_pos[0]
+        y = next_maze_pos[1]
+    path.append([x,y])
+    return path
+
 if __name__ == '__main__':
     # initial_position()
-    print(convert_to_global_coordinates(0,10))
-    print(convert_to_maze_coordinates(-1.35,0.62868))
-    print(convert_to_global_coordinates(0,11))
+    
+    # print(convert_to_global_coordinates(0,10))
+    # print(convert_to_maze_coordinates(-1.35,0.62868))
+    # print(convert_to_global_coordinates(0,11))
+    
+    import numpy as np
+    maze = [[-1 for i in range(16)] for j in range(16)]
+    walls = [[0 for i in range(16)] for j in range(16)]
+    for i in range(1,16):
+        walls[0][i] = 1010
+    print(np.array(walls))
+    destination = [[8,8],[8,7],[7,8],[7,7]]
+    temp = np.array(algo.mod_flood_fill(maze, walls, destination))
+    print(temp)
+    print(algo.determine_next_maze_pos(maze, walls, [0,7]))
+    print(algo.determine_next_maze_pos(maze, walls, [1,7]))
+    print(algo.determine_next_maze_pos(maze, walls, [5,7]))
+    print(algo.determine_next_maze_pos(maze, walls, [6,7]))
+    
+    print(convert_to_path(temp, walls, [0,15]))
+    
+    pass
