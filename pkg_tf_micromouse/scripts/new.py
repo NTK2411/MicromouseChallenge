@@ -149,10 +149,10 @@ def update_wall_mapping(x,y):
     global walls, yaw_, region_left, region_fleft, region_front,region_fright, region_right
     mouse_orn = find_orientation()
     '''
-        3 Up (+ y axis)
-        2 Down
         0 Right(+ x axis)
         1 Left
+        2 Down
+        3 Up (+ y axis)
 
         w/ reference to +y axis
         -left wall 1
@@ -164,36 +164,37 @@ def update_wall_mapping(x,y):
     walll = 0
     wallr = 0
     state_description = ''
-    if region_front < 0.11:
+    wall_distance_senstivity = 0.093
+    if region_front < wall_distance_senstivity + 0.025:
         state_description += ' F'
         if mouse_orn == 0:
-            wallf += 1000
-        if mouse_orn == 1:
-            wallf += 10
-        if mouse_orn == 2:
             wallf += 100
-        if mouse_orn == 3:
+        if mouse_orn == 1:
             wallf += 1
-    if region_right < 0.11:
+        if mouse_orn == 2:
+            wallf += 10
+        if mouse_orn == 3:
+            wallf += 1000
+    if region_right < wall_distance_senstivity :
         state_description += ' R'
         if mouse_orn == 0:
-            wallr += 100
-        if mouse_orn == 1:
-            wallr += 1
-        if mouse_orn == 2:
             wallr += 10
-        if mouse_orn == 3:
+        if mouse_orn == 1:
             wallr += 1000
-    if region_left < 0.11:
+        if mouse_orn == 2:
+            wallr += 1
+        if mouse_orn == 3:
+            wallr += 100
+    if region_left < wall_distance_senstivity :
         state_description += ' L'
         if mouse_orn == 0:
-            walll += 1
-        if mouse_orn == 1:
-            walll += 100
-        if mouse_orn == 2:
             walll += 1000
-        if mouse_orn == 3:
+        if mouse_orn == 1:
             walll += 10
+        if mouse_orn == 2:
+            walll += 100
+        if mouse_orn == 3:
+            walll += 1
     if wallf != 0:
         if((walls[x][y]//wallf)%10) != 1:
                 walls[x][y] += wallf
@@ -203,6 +204,9 @@ def update_wall_mapping(x,y):
     if wallr != 0:
         if((walls[x][y]//wallr)%10) != 1:
                 walls[x][y] += wallr
+    orien = ["Right","Left","Down","Up"]
+    print(orien[mouse_orn],state_description)
+    print(state_description, region_left, region_front, region_right)
 #function to convert global coordinates to maze coordinates
 def convert_to_maze_coordinates(x,y):
     maze_box_size = 0.18
@@ -322,7 +326,7 @@ def explore(destination_array_maze_coordinates = [[8,8],[8,7],[7,8],[7,7]]):
     
     #spawn done above
     #wall updatw
-    print("Initialized, region_left: %s, region_front: %s, region_right: %s" % (region_left, region_front, region_right))
+    print("Initialized:: region_left: %s, region_front: %s, region_right: %s" % (region_left, region_front, region_right))
     update_wall_mapping(pos_maze_x, pos_maze_y)
     #flood fill maze
     algo.mod_flood_fill(maze, walls, destination_array_maze_coordinates)
@@ -358,7 +362,7 @@ def explore(destination_array_maze_coordinates = [[8,8],[8,7],[7,8],[7,7]]):
         
         ###correct the orientation before updating walls
         
-        set_orientation(find_orientation())
+        # set_orientation(find_orientation())
         rospy.sleep(1)
         #update walls
         # pos_maze_x, pos_maze_y = convert_to_maze_coordinates(position_.x, position_.y)

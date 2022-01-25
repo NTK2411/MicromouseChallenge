@@ -101,4 +101,7 @@ if __name__ == '__main__':
     
     print(convert_to_path(temp, walls, [0,15]))
     
+    mat = []
+    print(len(mat))
+    
     pass
