@@ -462,7 +462,7 @@ def main():
         done()
         print("Lets go")
         #function exploring maze
-        end_pos = explore([[4,6]])   
+        end_pos = explore()   
         print("Going to start position")
         dummy_pos = explore([[0,15]], False)
         print("Exploring done")
