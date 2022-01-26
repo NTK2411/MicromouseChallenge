@@ -187,7 +187,7 @@ def determine_next_maze_pos(maze, walls, current_maze_pos):
         if (((walls[x][y]//10)%10) == 1 or ((walls[x][y-1]//1000)) == 1)!= True:
             # print("down")
             narray.append([maze[x][y-1], x, y-1])
-    print("Length ",len(narray))
+    # print("Length ",len(narray))
     if len(narray) > 0:
         next_maze_pos=narray[0]
         for x in narray:
@@ -198,6 +198,29 @@ def determine_next_maze_pos(maze, walls, current_maze_pos):
         print("No next pos (maa c*ud gayi)")
         
     
+def optimize_path(path):
+    '''
+    optimize path function
+    '''
+    new_path = []
+    # print(path)
+    cur_dir = [0,0]
+    last_dir = [0,0]
+    for x in range(len(path)):
+        if x == 0:
+            new_path.append(path[x])
+            if len(path) > 1:
+                #last_dir = path[x+1] - path[x]
+                last_dir = [path[x+1][0] - path[x][0], path[x+1][1] - path[x][1]]
+        else:
+            cur_dir = [path[x][0]-path[x-1][0], path[x][1]-path[x-1][1]]
+            if last_dir[0] == cur_dir[0] and last_dir[1] == cur_dir[1]:
+                continue
+            else:
+                new_path.append(path[x-1])
+                last_dir = cur_dir
+    new_path.append(path[-1])
+    return new_path
 
 # print(mod_flood_fill(maze, walls, 3, 2))
 
@@ -233,4 +256,5 @@ if __name__ == '__main__':
     # print(determine_next_maze_pos(maze, walls, [6,7]))
     # print(determine_next_maze_pos(maze, walls, [1,1]))
     print(convert_to_path(temp, walls, [0,15]))
+    print(optimize_path(convert_to_path(temp, walls, [0,15])))
     

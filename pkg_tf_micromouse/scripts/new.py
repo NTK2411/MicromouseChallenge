@@ -316,13 +316,13 @@ import numpy as np
 ###REMOVE THIS LATER ON###
 
 #explores the maze
-def explore(destination_array_maze_coordinates = [[8,8],[8,7],[7,8],[7,7]]):
+def explore(destination_array_maze_coordinates = [[8,8],[8,7],[7,8],[7,7]],spawn_position_flag = True):
     global maze, walls, pos_maze_x, pos_maze_y, state_, desired_position_, maze_size
     
     # destination_array_maze_coordinates = [[8,8],[8,7],[7,8],[7,7]]
     
     #spawn take spawn position and convert to maze coordinates
-    pos_maze_x, pos_maze_y = convert_to_maze_coordinates(position_.x, position_.y)
+    # pos_maze_x, pos_maze_y = convert_to_maze_coordinates(position_.x, position_.y)
     # move_to_maze_position(0,0)
     # print("next")
     # move_to_maze_position(6,0)
@@ -330,7 +330,8 @@ def explore(destination_array_maze_coordinates = [[8,8],[8,7],[7,8],[7,7]]):
     #spawn done above
     #wall updatw
     print("Initialized:: region_left: %s, region_front: %s, region_right: %s" % (region_left, region_front, region_right))
-    pos_maze_x, pos_maze_y = 0,15
+    if spawn_position_flag:
+        pos_maze_x, pos_maze_y = 0,15
     update_wall_mapping(pos_maze_x, pos_maze_y)
     #flood fill maze
     algo.mod_flood_fill(maze, walls, destination_array_maze_coordinates)
@@ -339,11 +340,11 @@ def explore(destination_array_maze_coordinates = [[8,8],[8,7],[7,8],[7,7]]):
     print("current position: ", pos_maze_x, pos_maze_y)
     print(np.array(walls))
     print(np.array(maze))
-    pos_maze_x, pos_maze_y = convert_to_maze_coordinates(position_.x, position_.y)
+    # pos_maze_x, pos_maze_y = convert_to_maze_coordinates(position_.x, position_.y)
     
     next_pos_x = 0
     next_pos_y = 16
-    pos_maze_x, pos_maze_y = 0,15
+    # pos_maze_x, pos_maze_y = 0,15
     while(maze[pos_maze_x][pos_maze_y] != 0):
         #decision from flood fill maze
         
@@ -381,8 +382,8 @@ def explore(destination_array_maze_coordinates = [[8,8],[8,7],[7,8],[7,7]]):
         # rospy.sleep(1)
         #update walls
         # pos_maze_x, pos_maze_y = convert_to_maze_coordinates(position_.x, position_.y)
-        
-        update_wall_mapping(pos_maze_x, pos_maze_y)
+        if walls[pos_maze_x][pos_maze_y] == 0:
+            update_wall_mapping(pos_maze_x, pos_maze_y)
         # update_wall_mapping(next_pos_x, next_pos_y)
         
         #update flood fill maze
@@ -414,14 +415,29 @@ def initialize():
             break
     print("Initialized, region_left: %s, region_front: %s, region_right: %s" % (region_left, region_front, region_right))
     
-def run(end_pos):
+def run(start_pos,end_pos):
     global maze, walls
     algo.mod_flood_fill(maze, walls, [end_pos])
-    path = algo.convert_to_path(maze, walls, end_pos)
-    for pos in path:
+    path = algo.convert_to_path(maze, walls, start_pos)
+    print("Path: ",path)
+    path_optimized = algo.optimize_path(path)
+    print("Path optimized: ",path_optimized)
+    print()
+    for pos in path_optimized:
         x = pos[0]
         y = pos[1]
+        print("current position: ", pos_maze_x, pos_maze_y)
+        print("next position: ", x, y)
         move_to_maze_position(x,y)
+    #now traverse path_optimized in reverse
+    for pos in path_optimized[::-1]:
+        x = pos[0]
+        y = pos[1]
+        print("current position: ", pos_maze_x, pos_maze_y)
+        print("next position: ", x, y)
+        move_to_maze_position(x,y)
+    pass
+        
 
 def main():
     global pub, desired_position_, state_, pos_maze_x, pos_maze_y, maze_size
@@ -446,27 +462,36 @@ def main():
         done()
         print("Lets go")
         #function exploring maze
-        end_pos = explore()   
-        explore([[0,15]])
+        end_pos = explore([[4,6]])   
+        print("Going to start position")
+        dummy_pos = explore([[0,15]], False)
+        print("Exploring done")
+        print()
+        print("Start pos: ", start_pos)
+        print("End pos: ", end_pos)
+        print()
         
+        #                           ///
         #run 1
         print("Going for Run 1")
-        run(end_pos)
-        run(start_pos)
+        run(start_pos, end_pos)
+        # run(end_pos, start_pos)
         print()
         
         #run 2
         print("Going for Run 2")
-        run(end_pos)
-        run(start_pos)
+        run(start_pos, end_pos)
+        # run(end_pos, start_pos)
         print()
         
         #run 3
         print("Going for Run 3")
-        run(end_pos)
-        run(start_pos)
+        run(start_pos, end_pos)
+        # run(end_pos, start_pos)
         
         print()
+        #                           ///
+        
         #                                               ///
         
         ###     ///debugging set_orientation

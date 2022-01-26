@@ -78,11 +78,20 @@ def convert_to_path(maze, walls, current_maze_pos):
     path.append([x,y])
     return path
 
+#take an array of points and print a matrix where points are 1
+def visualize_path(path):
+    maze_size = 16
+    maze = [[0 for x in range(maze_size)] for y in range(maze_size)] 
+    for point in path:
+        maze[point[0]][point[1]] = 1
+    for row in maze:
+        print(row)
+
 if __name__ == '__main__':
     # initial_position()
     
-    print(convert_to_global_coordinates(7,13))
-    print(convert_to_global_coordinates(0, 8))
+    # print(convert_to_global_coordinates(7,13))
+    # print(convert_to_global_coordinates(0, 8))
     # print(convert_to_maze_coordinates(-1.35,0.62868))
     # print(convert_to_global_coordinates(0,11))
     
@@ -105,4 +114,7 @@ if __name__ == '__main__':
     # mat = []
     # print(len(mat))
     
+    visualize_path([[0, 15], [0, 14], [1, 14], [1, 13], [1, 12], [2, 12], [3, 12], [3, 11], [3, 10], [2, 10], [2, 9], [2, 8], [2, 7], [3, 7], [4, 7], [4, 6]])
+    print('Hola')
+    visualize_path([[4, 6], [4, 7], [3, 7], [2, 7], [2, 8], [2, 9], [1, 9], [1, 8], [0, 8], [0, 9], [0, 10], [0, 11], [0, 12], [0, 13], [0, 14], [0, 15]])
     pass
